@@ -13,7 +13,7 @@ export default function Home() {
     <main className="min-h-screen p-4 md:p-8 lg:p-12 bg-gray-50 dark:bg-gray-900">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="text-center space-y-2">
-          <h1 className="text-3xl font-bold">Error Message Design System</h1>
+          <h1 className="text-3xl font-bold">Error Message Design</h1>
           <p className="text-muted-foreground">
             Three different approaches to error messages in common user
             scenarios
