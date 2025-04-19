@@ -1,4 +1,4 @@
-# Error Message Design System
+# Error Message Design
 
 A comprehensive collection of user-friendly error message designs for Next.js applications using TypeScript, Tailwind CSS, and shadcn/ui components.
 
