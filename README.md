@@ -2,8 +2,6 @@
 
 A comprehensive collection of user-friendly error message designs for Next.js applications using TypeScript, Tailwind CSS, and shadcn/ui components.
 
-![Error Message Design System](https://placeholder.svg?height=400&width=800)
-
 ## Overview
 
 This project demonstrates three different approaches to error message design in web applications, each implemented in a realistic user scenario. The goal is to provide developers with patterns for creating error messages that are informative, user-friendly, and reduce frustration.
@@ -32,7 +30,7 @@ This project demonstrates three different approaches to error message design in 
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/error-message-design-system.git
+git clone https://github.com/karlosM1/error-message-design-system.git
 
 # Navigate to the project directory
 cd error-message-design-system
@@ -47,8 +45,6 @@ npm run dev
 ## Error Design Patterns
 
 ### 1. Form Validation Errors
-
-![Form Validation Errors](https://placeholder.svg?height=300&width=600)
 
 The sign-up form demonstrates inline field-level validation with contextual error messages:
 
@@ -67,8 +63,6 @@ The sign-up form demonstrates inline field-level validation with contextual erro
 
 ### 2. Payment Processing Errors
 
-![Payment Processing Errors](https://placeholder.svg?height=300&width=600)
-
 The payment form uses a modal dialog for critical payment failures:
 
 - Clean payment form with formatting helpers
@@ -85,8 +79,6 @@ The payment form uses a modal dialog for critical payment failures:
 ```
 
 ### 3. Network Connectivity Errors
-
-![Network Connectivity Errors](https://placeholder.svg?height=300&width=600)
 
 The network error shows a status-based error with automatic recovery:
 
