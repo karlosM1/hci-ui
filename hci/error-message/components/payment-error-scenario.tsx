@@ -35,7 +35,6 @@ export function PaymentErrorScenario() {
     e.preventDefault();
     setProcessing(true);
 
-    // Simulate payment processing
     setTimeout(() => {
       setProcessing(false);
       setShowError(true);
@@ -125,7 +124,7 @@ export function PaymentErrorScenario() {
 
             <div className="pt-2">
               <Button type="submit" className="w-full" disabled={processing}>
-                {processing ? "Processing..." : "Pay $49.99"}
+                {processing ? "Processing..." : "Pay ₱1,499.99"}
               </Button>
             </div>
           </form>

@@ -20,7 +20,6 @@ export function NetworkErrorScenario() {
   const [reconnectAttempt, setReconnectAttempt] = useState(0);
   const [showContent, setShowContent] = useState(true);
 
-  // Simulate a network disconnection after component mount
   useEffect(() => {
     const timer = setTimeout(() => {
       setStatus("disconnected");
@@ -30,7 +29,6 @@ export function NetworkErrorScenario() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Handle reconnection progress
   useEffect(() => {
     if (status !== "reconnecting") return;
 
@@ -42,7 +40,6 @@ export function NetworkErrorScenario() {
       if (progress >= 100) {
         clearInterval(interval);
 
-        // Simulate success on odd attempts, failure on even attempts
         if (reconnectAttempt % 2 === 0) {
           setStatus("disconnected");
           setReconnectProgress(0);
@@ -159,7 +156,6 @@ export function NetworkErrorScenario() {
         </div>
       </div>
 
-      {/* Simulated content area */}
       <div className="rounded-lg border border-gray-200 dark:border-gray-800 overflow-hidden">
         <div className="bg-gray-100 dark:bg-gray-800 px-4 py-2 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
           <h3 className="font-medium">Dashboard Content</h3>

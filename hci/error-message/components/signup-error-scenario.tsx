@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { z } from "zod";
 import { AlertCircle, CheckCircle, Info } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,15 +10,39 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
+const passwordRequirements = {
+  min: z.string().min(8, "Be at least 8 characters long"),
+  uppercase: z.string().regex(/[A-Z]/, "Contain at least one uppercase letter"),
+  number: z.string().regex(/[0-9]/, "Contain at least one number"),
+};
+
 const baseSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address" }),
-  password: z
-    .string()
-    .min(8, { message: "Password must be at least 8 characters" })
-    .regex(/[A-Z]/, {
-      message: "Password must contain at least one uppercase letter",
-    })
-    .regex(/[0-9]/, { message: "Password must contain at least one number" }),
+  password: z.string().superRefine((password, ctx) => {
+    if (password.length < 8) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.too_small,
+        minimum: 8,
+        type: "string",
+        inclusive: true,
+        message: "Be at least 8 characters long",
+      });
+    }
+
+    if (!/[A-Z]/.test(password)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Contain at least one uppercase letter",
+      });
+    }
+
+    if (!/[0-9]/.test(password)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "Contain at least one number",
+      });
+    }
+  }),
   confirmPassword: z.string(),
 });
 
@@ -51,18 +75,56 @@ export function SignupErrorScenario() {
   const [errors, setErrors] = useState<FormErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [submitted, setSubmitted] = useState(false);
+  const [isFormVisible, setIsFormVisible] = useState(false);
+
+  useEffect(() => {
+    setIsFormVisible(true);
+  }, []);
 
   const validateField = (name: keyof FormData, value: string) => {
     try {
       if (name === "confirmPassword") {
-        // For confirmPassword, we need to check if it matches the password
         if (formData.password !== value) {
           return { valid: false, errors: ["Passwords don't match"] };
         }
         return { valid: true, errors: [] };
+      } else if (name === "password") {
+        const errors: string[] = [];
+
+        try {
+          passwordRequirements.min.parse(value);
+        } catch (e) {
+          errors.push("Be at least 8 characters long");
+        }
+
+        try {
+          passwordRequirements.uppercase.parse(value);
+        } catch (e) {
+          errors.push("Contain at least one uppercase letter");
+        }
+
+        try {
+          passwordRequirements.number.parse(value);
+        } catch (e) {
+          errors.push("Contain at least one number");
+        }
+
+        return { valid: errors.length === 0, errors };
+      } else if (name === "email") {
+        try {
+          baseSchema.shape.email.parse(value);
+          return { valid: true, errors: [] };
+        } catch (e) {
+          if (e instanceof z.ZodError) {
+            return {
+              valid: false,
+              errors: ["Please enter a valid email address"],
+            };
+          }
+          return { valid: false, errors: ["An unknown error occurred"] };
+        }
       } else {
-        // For other fields, we can use the baseSchema
-        baseSchema.shape[name].parse(value);
+        baseSchema.shape[name as keyof typeof baseSchema.shape].parse(value);
         return { valid: true, errors: [] };
       }
     } catch (error) {
@@ -86,6 +148,7 @@ export function SignupErrorScenario() {
 
   const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+
     setTouched((prev) => ({ ...prev, [name]: true }));
 
     const result = validateField(name as keyof FormData, value);
@@ -96,7 +159,6 @@ export function SignupErrorScenario() {
     e.preventDefault();
     setSubmitted(true);
 
-    // Validate all fields
     const newErrors: FormErrors = {};
     let isValid = true;
 
@@ -109,10 +171,10 @@ export function SignupErrorScenario() {
     });
 
     setErrors(newErrors);
+
     setTouched({ email: true, password: true, confirmPassword: true });
 
     if (isValid) {
-      // Form is valid, but we'll simulate an email already exists error
       setErrors({
         email: ["This email is already registered. Try signing in instead."],
       });
@@ -125,6 +187,10 @@ export function SignupErrorScenario() {
     if (formData[field]) return "success";
     return "default";
   };
+
+  if (!isFormVisible) {
+    return <div className="p-4 text-center">Loading form...</div>;
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-md mx-auto">
@@ -168,7 +234,7 @@ export function SignupErrorScenario() {
             <CheckCircle className="h-5 w-5 text-green-500 absolute right-3 top-1/2 -translate-y-1/2" />
           )}
         </div>
-        {errors.email && touched.email && (
+        {errors.email && errors.email.length > 0 && touched.email && (
           <div className="text-sm text-red-500 mt-1 flex items-start gap-1.5">
             <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
             <span>{errors.email[0]}</span>
@@ -203,7 +269,7 @@ export function SignupErrorScenario() {
             <CheckCircle className="h-5 w-5 text-green-500 absolute right-3 top-1/2 -translate-y-1/2" />
           )}
         </div>
-        {errors.password && touched.password && (
+        {errors.password && errors.password.length > 0 && touched.password && (
           <div className="text-sm text-red-500 mt-1">
             <div className="flex items-start gap-1.5 mb-1">
               <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
@@ -216,7 +282,7 @@ export function SignupErrorScenario() {
             </ul>
           </div>
         )}
-        {!errors.password && touched.password && (
+        {!errors.password && touched.password && formData.password && (
           <div className="text-sm text-green-600 dark:text-green-400 mt-1 flex items-center gap-1.5">
             <CheckCircle className="h-4 w-4" />
             <span>Password meets requirements</span>
@@ -251,12 +317,14 @@ export function SignupErrorScenario() {
             <CheckCircle className="h-5 w-5 text-green-500 absolute right-3 top-1/2 -translate-y-1/2" />
           )}
         </div>
-        {errors.confirmPassword && touched.confirmPassword && (
-          <div className="text-sm text-red-500 mt-1 flex items-start gap-1.5">
-            <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
-            <span>{errors.confirmPassword[0]}</span>
-          </div>
-        )}
+        {errors.confirmPassword &&
+          errors.confirmPassword.length > 0 &&
+          touched.confirmPassword && (
+            <div className="text-sm text-red-500 mt-1 flex items-start gap-1.5">
+              <AlertCircle className="h-4 w-4 mt-0.5 flex-shrink-0" />
+              <span>{errors.confirmPassword[0]}</span>
+            </div>
+          )}
       </div>
 
       <div className="pt-2">
